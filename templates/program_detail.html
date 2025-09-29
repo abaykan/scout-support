@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{{ program.program_name }} - S.C.O.U.T</title>
+        <link rel="shortcut icon" type="image/svg" href="https://cdn.jsdelivr.net/npm/twemoji@11.3.0/2/svg/1f4a2.svg">
+        <link rel="stylesheet" href="https://unpkg.com/hack@0.8.1/dist/hack.css" />
+        <link rel="stylesheet" href="https://unpkg.com/hack@0.8.1/dist/dark.css" />
+        <style type="text/css">
+            .dark {
+                background-color: #0c0f0a;
+                color: #999999;
+            }
+            .main {
+                margin-top: 2em;
+            }
+            .container {
+                max-width: 80rem;
+            }
+            .stat-number {
+                font-size: 2em;
+                font-weight: bold;
+            }
+            .platform-badge {
+                text-align: center;
+            }
+            a {
+                color: #00bcd4;
+                text-decoration: none;
+                border: none;
+            }
+            table tbody td:first-child {
+                font-weight: normal;
+            }
+            pre {
+                height: auto;
+                max-height: 10em;
+                overflow: auto;
+                word-break: normal !important;
+                word-wrap: normal !important;
+                white-space: pre !important;
+                background-color: transparent !important;
+                color: #999999 !important;
+            }
+        </style>
+    </head>
+    <body class="hack dark">
+        <div class="main container">
+            <h1>
+                <a href="/">← back to dashboard</a>
+            </h1>
+
+            <h2>{{ program.program_name }}</h2>
+            <p>
+                <strong>Platform:</strong> <span class="{{ program.platform.lower() }}">{{ program.platform }}</span><br/>
+                <strong>Program URL:</strong> <a href="{{ program.program_url }}" target="_blank">{{ program.program_url }}</a><br/>
+                <strong>Last Checked:</strong> {{ program.last_checked.strftime('%Y-%m-%d %H:%M') if program.last_checked else 'N/A' }}<br/>
+                <strong>Total Subdomains Found:</strong> {{ subdomains|length }}<br/>
+                <strong>Actions:</strong> <a href="/httpx/{{ program.program_name|urlencode }}">View HTTPX Results</a><br/>
+                <strong>Scope:</strong>
+                <pre style="padding-top: 0;"><code>{% if program.scope %}{{ program.scope }} {% endif %}</code></pre>
+            </p>
+            
+            
+
+            <h3>Discovered Subdomains ({{ subdomains|length }})</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Subdomain</th>
+                        <th>First Seen</th>
+                        <th>Last Seen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subdomain in subdomains %}
+                    <tr>
+                        <td>{{ subdomain.subdomain }}</td>
+                        <td>{{ subdomain.first_seen.strftime('%Y-%m-%d %H:%M') if subdomain.first_seen else 'N/A' }}</td>
+                        <td>{{ subdomain.last_seen.strftime('%Y-%m-%d %H:%M') if subdomain.last_seen else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <footer class="footer" style="text-align: center;margin-top: 5em;">
+                © 2025<br/>
+                <a href="https://github.com/abaykan/scout" target="_blank">S.C.O.U.T</a>
+            </footer>
+        </div>
+    </body>
+</html>

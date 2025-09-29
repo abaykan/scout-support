@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>S.C.O.U.T</title>
+        <link rel="shortcut icon" type="image/svg" href="https://cdn.jsdelivr.net/npm/twemoji@11.3.0/2/svg/1f4a2.svg">
+        <link rel="stylesheet" href="https://unpkg.com/hack@0.8.1/dist/hack.css" />
+        <link rel="stylesheet" href="https://unpkg.com/hack@0.8.1/dist/dark.css" />
+        <style type="text/css">
+            .dark {
+                background-color: #0c0f0a;
+                color: #999999;
+            }
+            .main {
+                margin-top: 2em;
+            }
+            .container {
+                max-width: 80rem;
+            }
+            .stat-number {
+                font-size: 2em;
+                font-weight: bold;
+            }
+            .platform-badge {
+                text-align: center;
+                vertical-align: middle;
+            }
+            .actions-column {
+                vertical-align: top;
+                text-align: center;
+            }
+            .actions-vertical {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+            .actions-vertical a {
+                display: block;
+                padding: 2px 0;
+            }
+            a {
+                color: #00bcd4;
+                text-decoration: none;
+                border: none;
+            }
+        </style>
+    </head>
+    <body class="hack dark">
+        <div class="main container">
+            <h1>S.C.O.U.T Dashboard</h1>
+            <p>Scope Change Observation & Unified Tracking.</p>
+
+            <div class="grid grid-example">
+                <div class="cell -4of12">
+                    <div class="content">
+                        <div class="alert alert-info">
+                            <center>
+                                <div class="stat-number" id="total-programs">-</div>
+                                Total Programs
+                            </center>
+                        </div>
+                    </div>
+                </div>
+                <div class="cell -4of12">
+                    <div class="content">
+                        <div class="alert alert-info">
+                            <center>
+                                <div class="stat-number" id="total-subdomains">-</div>
+                                Subdomains Found
+                            </center>
+                        </div>
+                    </div>
+                </div>
+                <div class="cell -4of12">
+                    <div class="content">
+                        <div class="alert alert-info">
+                            <center>
+                                <div class="stat-number" id="platform-count">-</div>
+                                Platforms
+                            </center>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr/>
+            <button class="btn btn-info btn-ghost" onclick="refreshData()">🔄 Refresh Data</button>
+            <a href="/httpx" class="btn btn-primary btn-ghost" style="margin-left: 10px;">🔬 View HTTPX Results</a>
+
+            <h4 style="margin-top: 3em;">Bug Bounty Programs</h4>
+            <table id="programs-table">
+                <thead>
+                    <tr>
+                        <th>Platform</th>
+                        <th>Program Name</th>
+                        <th>Last Checked</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="programs-body">
+                    {% for program in programs %}
+                    <tr>
+                        <td class="platform-badge">
+                            <span class="{{ program.platform.lower() }}">
+                                {{ program.platform }}
+                            </span>
+                        </td>
+                        <td class="platform-badge">{{ program.program_name }}</td>
+                        <td class="platform-badge">{{ program.last_checked.strftime('%Y-%m-%d %H:%M') if program.last_checked else 'N/A' }}</td>
+                        <td class="actions-column">
+                            <div class="actions-vertical">
+                                <a href="{{ program.program_url }}" target="_blank" class="program-link">
+                                    View Program
+                                </a>
+                                <a href="/program/{{ program.program_name|urlencode }}" class="detail-link">
+                                    View Subdomains
+                                </a>
+                                <a href="/httpx/{{ program.program_name|urlencode }}" class="httpx-link">
+                                    View HTTPX
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <script>
+                // Load statistics
+                async function loadStats() {
+                    try {
+                        const response = await fetch('/api/stats');
+                        const stats = await response.json();
+                        
+                        if (stats.error) {
+                            console.error('Error loading stats:', stats.error);
+                            return;
+                        }
+                        
+                        console.log('Stats loaded:', stats);
+                        
+                        document.getElementById('total-programs').textContent = stats.total_programs || 0;
+                        document.getElementById('total-subdomains').textContent = stats.total_subdomains || 0;
+                        
+                        // Calculate platform count - count unique platforms
+                        if (stats.platforms && Array.isArray(stats.platforms)) {
+                            document.getElementById('platform-count').textContent = stats.platforms.length;
+                        } else {
+                            console.warn('Platforms data not found or invalid:', stats.platforms);
+                            document.getElementById('platform-count').textContent = 0;
+                        }
+                        
+                    } catch (error) {
+                        console.error('Error loading statistics:', error);
+                        // Set fallback values
+                        document.getElementById('total-programs').textContent = 'Error';
+                        document.getElementById('total-subdomains').textContent = 'Error';
+                        document.getElementById('platform-count').textContent = 'Error';
+                    }
+                }
+                
+                // Refresh all data
+                async function refreshData() {
+                    const btn = event.target;
+                    const originalText = btn.textContent;
+                    btn.textContent = '🔄 Loading...';
+                    btn.disabled = true;
+                    
+                    try {
+                        await Promise.all([
+                            loadStats(),
+                            // You could add API calls to refresh tables here if needed
+                        ]);
+                        
+                        // Reload the page to get fresh data from server
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                        
+                    } catch (error) {
+                        console.error('Error refreshing data:', error);
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    }
+                }
+                
+                // Initialize on page load
+                document.addEventListener('DOMContentLoaded', loadStats);
+                
+                // Auto-refresh every 5 minutes
+                setInterval(loadStats, 300000);
+            </script>
+
+            <footer class="footer" style="text-align: center;margin-top: 5em;">
+                © 2025<br/>
+                <a href="https://github.com/abaykan/scout" target="_blank">S.C.O.U.T</a>
+            </footer>
+        </div>
+    </body>
+</html>

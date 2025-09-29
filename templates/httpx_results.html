@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>HTTPX Scan Results - S.C.O.U.T</title>
+        <link rel="shortcut icon" type="image/svg" href="https://cdn.jsdelivr.net/npm/twemoji@11.3.0/2/svg/1f4a2.svg">
+        <link rel="stylesheet" href="https://unpkg.com/hack@0.8.1/dist/hack.css" />
+        <link rel="stylesheet" href="https://unpkg.com/hack@0.8.1/dist/dark.css" />
+        <style type="text/css">
+            .dark {
+                background-color: #0c0f0a;
+                color: #999999;
+            }
+            .main {
+                margin-top: 2em;
+            }
+            .container {
+                max-width: 80rem;
+            }
+            .stat-number {
+                font-size: 2em;
+                font-weight: bold;
+            }
+            .platform-badge {
+                text-align: center;
+            }
+            a {
+                color: #00bcd4;
+                text-decoration: none;
+                border: none;
+            }
+            table tbody td:first-child {
+                font-weight: normal;
+            }
+            pre {
+                height: auto;
+                max-height: 10em;
+                overflow: auto;
+                word-break: normal !important;
+                word-wrap: normal !important;
+                white-space: pre !important;
+                background-color: transparent !important;
+                color: #999999 !important;
+            }
+            .status-200 { color: #28a745; font-weight: bold; vertical-align: middle;text-align: center;}
+            .status-301, .status-302 { color: #ffc107; font-weight: bold; vertical-align: middle;text-align: center;}
+            .status-404, .status-403, .status-401 { color: #dc3545; font-weight: bold; vertical-align: middle;text-align: center;}
+            .status-500 { color: #6f42c1; font-weight: bold; vertical-align: middle;text-align: center;}
+            .tech-badge {
+                background: transparent;
+                padding: 2px 6px;
+                border: 1px solid #00bcd4;
+                border-radius: 3px;
+                font-size: 12px;
+                margin: 0.2em;
+                display: inline-block;
+            }
+            .url {
+                font-family: monospace;
+                word-break: break-all;
+                vertical-align: middle;
+            }
+            .no-results {
+                text-align: center;
+                padding: 40px;
+                color: #6c757d;
+            }
+            .program-section {
+                margin-bottom: 30px;
+                border: 1px solid #444;
+                border-radius: 5px;
+                overflow: hidden;
+            }
+            .program-header {
+                background: transparent;
+                padding: 15px;
+                cursor: pointer;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .program-header h3 {
+                margin: 0;
+            }
+            .program-count {
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body class="hack dark">
+        <div class="main container">
+            <h1>
+                <a href="/">← back to dashboard</a>
+            </h1>
+
+            <h2>HTTPX Scan Results</h2>
+            <p>
+                <strong>Total URLs Found:</strong> {{ total_results }}<br/>
+                <strong>Total Programs:</strong> {{ programs_results|length }}
+            </p>
+
+            {% if total_results == 0 %}
+                <div class="no-results">
+                    <h3>No HTTPX Results Found</h3>
+                    <p>Run the HTTPX scanner to generate results.</p>
+                </div>
+            {% else %}
+                {% for program_name, results in programs_results.items() %}
+                <div class="program-section">
+                    <div class="program-header" onclick="toggleProgram('{{ program_name }}')">
+                        <h3>{{ program_name }}</h3>
+                        <span class="program-count">{{ results|length }} URLs</span>
+                    </div>
+                    <div id="{{ program_name }}" style="display: block;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>URL</th>
+                                    <th>Status</th>
+                                    <th>Title</th>
+                                    <th>Technologies</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in results %}
+                                <tr>
+                                    <td class="url">{{ result.url }}</td>
+                                    <td style="vertical-align: middle;text-align: center;" class="status-{{ result.status_code }}">{{ result.status_code }}</td>
+                                    <td style="vertical-align: middle;">{{ result.title }}</td>
+                                    <td>
+                                        {% if result.tech %}
+                                            {% for tech in result.tech.split(',') %}
+                                                <span class="tech-badge">{{ tech.strip() }}</span>
+                                            {% endfor %}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <script>
+                function toggleProgram(programName) {
+                    const element = document.getElementById(programName);
+                    if (element.style.display === 'none') {
+                        element.style.display = 'block';
+                    } else {
+                        element.style.display = 'none';
+                    }
+                }
+            </script>
+
+            <footer class="footer" style="text-align: center;margin-top: 5em;">
+                © 2025<br/>
+                <a href="https://github.com/abaykan/scout" target="_blank">S.C.O.U.T</a>
+            </footer>
+        </div>
+    </body>
+</html>
