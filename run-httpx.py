@@ -117,7 +117,7 @@ class HTTPXRunner:
                 base_name = os.path.splitext(os.path.basename(input_file))[0]
                 output_file = os.path.join(self.output_dir, f"{base_name}-httpx.txt")
             
-            # Jalankan command: cat file.txt | httpx -sc -td -title -timeout 10 -silent -no-color
+            # Jalankan command: cat file.txt | httpx -sc -td -title -timeout 30 -silent -no-color
             cmd = f'cat "{input_file}" | httpx -sc -td -title -timeout 30 -silent -no-color'
             self.logger.info(f"Running bulk httpx for file: {input_file}")
             

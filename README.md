@@ -1,4 +1,4 @@
-# Scout Support Project
+# Scout Support
 
 This is a separate project that provides support tools and web interface for the main S.C.O.U.T bug bounty monitoring system.
 
@@ -52,7 +52,7 @@ Automatically scans all `.txt` files in `scout/scans/` directory using bulk HTTP
 
 **Command executed:**
 ```bash
-cat "filename.txt" | httpx -sc -td -title -timeout 10 -silent -no-color
+cat "filename.txt" | httpx -sc -td -title -timeout 30 -silent -no-color
 ```
 
 **Output format:**
